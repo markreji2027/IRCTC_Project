@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Ticket</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4ff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 680px;
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .ticket-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .ticket-header h1 { color: #1a237e; font-size: 22px; font-weight: 700; }
+        .booking-id {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #888;
+        }
+        .booking-id span {
+            font-weight: 700;
+            color: #1565c0;
+            font-size: 15px;
+        }
+        .status-badge {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 18px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* Route strip */
+        .route-strip {
+            background: #1565c0;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .route-strip .station { text-align: center; }
+        .route-strip .station .code {
+            font-size: 26px;
+            font-weight: 700;
+        }
+        .route-strip .station .name {
+            font-size: 11px;
+            color: #90caf9;
+            margin-top: 4px;
+        }
+        .route-strip .station .time {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+        .route-strip .arrow {
+            text-align: center;
+            flex: 1;
+        }
+        .route-strip .arrow .line {
+            height: 2px;
+            background: rgba(255,255,255,0.3);
+            margin: 0 10px 6px;
+        }
+        .route-strip .arrow .info {
+            font-size: 11px;
+            color: #90caf9;
+        }
+
+        /* Details grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .detail-box {
+            background: #f8f9ff;
+            border-radius: 8px;
+            padding: 12px 14px;
+        }
+        .detail-box .label {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .detail-box .value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        /* Passengers */
+        .section-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a237e;
+            margin-bottom: 14px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e8eaf6;
+        }
+        .passenger-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+        .passenger-table thead tr {
+            background: #1565c0;
+            color: white;
+        }
+        .passenger-table thead th {
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .passenger-table tbody tr {
+            border-bottom: 1px solid #eee;
+        }
+        .passenger-table tbody tr:nth-child(even) {
+            background: #f8f9ff;
+        }
+        .passenger-table tbody td {
+            padding: 10px 14px;
+            color: #333;
+        }
+        .seat-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            background: #e3f2fd;
+            color: #1565c0;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        /* Fare */
+        .fare-box {
+            background: #f0f4ff;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .fare-box .label { font-size: 14px; color: #555; }
+        .fare-box .amount { font-size: 24px; font-weight: 700; color: #1565c0; }
+
+        /* Buttons */
+        .btn-row { display: flex; gap: 12px; }
+        .btn-download {
+            flex: 1; padding: 14px; text-align: center;
+            background: #1565c0; color: white;
+            border: none; border-radius: 10px;
+            font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .btn-download:hover { background: #0d47a1; }
+        .btn-home {
+            flex: 1; display: block; padding: 14px;
+            text-align: center; background: #2e7d32;
+            color: white; border-radius: 10px;
+            text-decoration: none; font-size: 15px;
+            font-weight: 700; transition: background 0.2s;
+        }
+        .btn-home:hover { background: #1b5e20; }
+
+        /* Print styles */
+        @media print {
+            body { background: white; padding: 0; }
+            .card { box-shadow: none; padding: 20px; }
+            .btn-row { display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="card" id="ticket-content">
+
+    <!-- Header -->
+    <div class="ticket-header">
+        <h1>🎫 Booking Confirmed</h1>
+        <div class="booking-id">
+            Booking ID: <span>#{{ booking.booking_id }}</span>
+        </div>
+        <div class="status-badge">✓ CONFIRMED</div>
+    </div>
+
+    <!-- Route strip -->
+    <div class="route-strip">
+        <div class="station">
+            <div class="code">{{ booking.from_code }}</div>
+            <div class="name">{{ booking.from_station }}</div>
+            <div class="time">{{ booking.departs_at }}</div>
+        </div>
+        <div class="arrow">
+            <div class="line"></div>
+            <div class="info">{{ booking.distance_km }} km</div>
+        </div>
+        <div class="station" style="text-align:right;">
+            <div class="code">{{ booking.to_code }}</div>
+            <div class="name">{{ booking.to_station }}</div>
+            <div class="time">{{ booking.arrives_at }}</div>
+        </div>
+    </div>
+
+    <!-- Details grid -->
+    <div class="details-grid">
+        <div class="detail-box">
+            <div class="label">Train</div>
+            <div class="value">{{ booking.train_no }}</div>
+        </div>
+        <div class="detail-box">
+            <div class="label">Train Name</div>
+            <div class="value">{{ booking.train_name }}</div>
+        </div>
+        <div class="detail-box">
+            <div class="label">Class</div>
+            <div class="value">{{ booking.class }}</div>
+        </div>
+        <div class="detail-box">
+            <div class="label">Travel Date</div>
+            <div class="value">{{ booking.travel_date }}</div>
+        </div>
+        <div class="detail-box">
+            <div class="label">Passengers</div>
+            <div class="value">{{ booking.total_passengers }}</div>
+        </div>
+        <div class="detail-box">
+            <div class="label">Booked At</div>
+            <div class="value">{{ booking.booked_at.strftime('%d %b %Y') }}</div>
+        </div>
+    </div>
+
+    <!-- Passengers table -->
+    <div class="section-label">Passenger Details</div>
+    <table class="passenger-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Seat No.</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in booking.passengers %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ p.first_name }} {{ p.last_name }}</td>
+                <td>{{ p.age }}</td>
+                <td>{{ p.gender }}</td>
+                <td><span class="seat-pill">{{ p.seat_number }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Total fare -->
+    <div class="fare-box">
+        <span class="label">Total Amount Paid</span>
+        <span class="amount">₹{{ "%.2f"|format(booking.total_fare) }}</span>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-row">
+        <button class="btn-download" onclick="window.print()">
+            ⬇ Download / Print Ticket
+        </button>
+        <a href="/" class="btn-home">🔍 Search Again</a>
+    </div>
+
+</div>
+</body>
+</html>

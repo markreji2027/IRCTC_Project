@@ -1,0 +1,92 @@
+{% extends "admin/base.html" %}
+{% block title %}Trains{% endblock %}
+{% block page_title %}Train Statistics{% endblock %}
+
+{% block content %}
+
+<div class="cards-row">
+    <div class="stat-card">
+        <div class="label">Total Trains</div>
+        <div class="value">{{ trains | length }}</div>
+        <div class="sub">In system</div>
+    </div>
+    <div class="stat-card green">
+        <div class="label">Booked Trains</div>
+        <div class="value">{{ booked_trains }}</div>
+        <div class="sub">At least 1 booking</div>
+    </div>
+    <div class="stat-card orange">
+        <div class="label">Total Seats</div>
+        <div class="value">{{ total_seats }}</div>
+        <div class="sub">Across all trains</div>
+    </div>
+    <div class="stat-card purple">
+        <div class="label">Seats Booked</div>
+        <div class="value">{{ seats_booked }}</div>
+        <div class="sub">Across all classes</div>
+    </div>
+</div>
+
+<div class="table-card">
+    <h3>All Trains — Seat Availability</h3>
+    {% if trains %}
+    <table>
+        <thead>
+            <tr>
+                <th>Train No</th>
+                <th>Train Name</th>
+                <th>Type</th>
+                <th>Route</th>
+                <th>General</th>
+                <th>2S</th>
+                <th>Sleeper</th>
+                <th>3AC</th>
+                <th>2AC</th>
+                <th>1AC</th>
+                <th>Bookings</th>
+                <th>Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in trains %}
+            <tr>
+                <td><strong style="color:#3b82f6;">{{ t.train_no }}</strong></td>
+                <td>{{ t.train_name }}</td>
+                <td>
+                    {% set badge = t.train_type | lower | replace(' ', '') %}
+                    <span class="badge badge-{{ badge }}">{{ t.train_type }}</span>
+                </td>
+                <td style="font-size:12px;">
+                    <strong>{{ t.source_code }}</strong>
+                    <span style="color:#cbd5e1;"> → </span>
+                    <strong>{{ t.dest_code }}</strong>
+                </td>
+                <!-- Seat columns -->
+                {% for cls in ['General', '2S', 'Sleeper', '3AC', '2AC', '1AC'] %}
+                {% set avail = t.seats.get(cls, 0) %}
+                <td style="text-align:center;">
+                    {% if cls == 'General' %}
+                    <span style="color:#22c55e; font-weight:700; font-size:12px;">AVL</span>
+                    {% elif avail > 50 %}
+                    <span style="color:#22c55e; font-weight:700;">{{ avail }}</span>
+                    {% elif avail > 10 %}
+                    <span style="color:#f97316; font-weight:700;">{{ avail }}</span>
+                    {% elif avail > 0 %}
+                    <span style="color:#f43f5e; font-weight:700;">{{ avail }}</span>
+                    {% else %}
+                    <span style="color:#cbd5e1; font-size:11px;">Full</span>
+                    {% endif %}
+                </td>
+                {% endfor %}
+                <td style="text-align:center;">{{ t.total_bookings or 0 }}</td>
+                <td class="revenue">₹{{ "{:,.0f}".format(t.total_revenue or 0) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-data">No trains found.</div>
+    {% endif %}
+</div>
+
+{% endblock %}

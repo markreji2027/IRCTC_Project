@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Ticket</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4ff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 620px;
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header { text-align: center; margin-bottom: 28px; }
+        .header h1 { color: #1a237e; font-size: 22px; font-weight: 700; }
+
+        .trip-info {
+            background: #f0f4ff;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 13px;
+        }
+        .trip-info .route { font-weight: 700; color: #1a237e; font-size: 16px; }
+        .trip-info .detail { color: #555; }
+        .trip-info .detail span { font-weight: 600; color: #333; }
+
+        .section-label {
+            font-size: 14px; font-weight: 700;
+            color: #1a237e; margin-bottom: 14px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e8eaf6;
+        }
+
+        .passenger-card {
+            border: 1.5px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .passenger-card .passenger-title {
+            font-size: 13px; font-weight: 700;
+            color: #1565c0; margin-bottom: 14px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label {
+            font-size: 12px; font-weight: 600; color: #555;
+        }
+        .form-group input,
+        .form-group select {
+            padding: 10px 12px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #222;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .form-group input:focus,
+        .form-group select:focus { border-color: #1565c0; }
+
+        .btn-remove {
+            position: absolute; top: 14px; right: 14px;
+            background: #fce4ec; color: #c62828;
+            border: none; border-radius: 6px;
+            padding: 4px 10px; font-size: 12px;
+            font-weight: 600; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-remove:hover { background: #f8bbd0; }
+
+        .btn-add {
+            width: 100%; padding: 12px;
+            background: white; color: #1565c0;
+            border: 2px dashed #1565c0;
+            border-radius: 10px; font-size: 14px;
+            font-weight: 600; cursor: pointer;
+            margin-bottom: 24px; transition: all 0.2s;
+        }
+        .btn-add:hover { background: #f0f4ff; }
+
+        .fare-summary {
+            background: #1565c0;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            color: white;
+        }
+        .fare-summary .row {
+            display: flex; justify-content: space-between;
+            font-size: 14px; margin-bottom: 8px;
+            color: #90caf9;
+        }
+        .fare-summary .row.total {
+            font-size: 20px; font-weight: 700;
+            color: white; margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-pay {
+            width: 100%; padding: 16px;
+            background: #2e7d32; color: white;
+            border: none; border-radius: 12px;
+            font-size: 17px; font-weight: 700;
+            cursor: pointer; transition: background 0.2s;
+            margin-bottom: 12px;
+        }
+        .btn-pay:hover { background: #1b5e20; }
+
+        .btn-back {
+            display: block; text-align: center; padding: 12px;
+            background: #f0f4ff; color: #1565c0;
+            border-radius: 10px; text-decoration: none;
+            font-weight: 600; font-size: 14px;
+            transition: background 0.2s;
+        }
+        .btn-back:hover { background: #e3f2fd; }
+    </style>
+</head>
+<body>
+<div class="card">
+
+    <div class="header"><h1>🎟️ Book Ticket</h1></div>
+
+    <!-- Trip summary -->
+    <div class="trip-info">
+        <div>
+            <div class="route">{{ train.train_no }} — {{ train.train_name }}</div>
+            <div class="detail" style="margin-top:6px;">
+                {{ train.from_station }} → {{ train.to_station }}
+            </div>
+        </div>
+        <div style="text-align:right;">
+            <div class="detail">Class: <span>{{ cls }}</span></div>
+            <div class="detail">Date: <span>{{ travel_date }}</span></div>
+            <div class="detail">Fare: <span>₹{{ "%.2f"|format(fare_amount) }}/person</span></div>
+        </div>
+    </div>
+
+    <form method="POST" action="/booking" id="booking-form">
+        <input type="hidden" name="train_no"    value="{{ train.train_no }}">
+        <input type="hidden" name="from_code"   value="{{ from_code }}">
+        <input type="hidden" name="to_code"     value="{{ to_code }}">
+        <input type="hidden" name="class"       value="{{ cls }}">
+        <input type="hidden" name="travel_date" value="{{ travel_date }}">
+        <input type="hidden" name="fare_amount" value="{{ fare_amount }}">
+
+        <div class="section-label">Passenger Details</div>
+
+        <div id="passengers-container">
+            <!-- Passenger 1 (cannot be removed) -->
+            <div class="passenger-card" id="pax-1">
+                <div class="passenger-title">Passenger 1</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" name="first_name" placeholder="First name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" name="last_name" placeholder="Last name" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Age</label>
+                        <input type="number" name="age" placeholder="Age" min="1" max="120" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select name="gender" required>
+                            <option value="" disabled selected>Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn-add" onclick="addPassenger()" id="add-btn">
+            + Add Passenger
+        </button>
+
+        <div class="fare-summary">
+            <div class="row">
+                <span>Fare per passenger</span>
+                <span>₹{{ "%.2f"|format(fare_amount) }}</span>
+            </div>
+            <div class="row">
+                <span>Passengers</span>
+                <span id="pax-count">1</span>
+            </div>
+            <div class="row total">
+                <span>Total Payable</span>
+                <span id="total-amount">₹{{ "%.2f"|format(fare_amount) }}</span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-pay" onclick="return confirmPayment()">
+            💳 Pay & Confirm Booking
+        </button>
+    </form>
+
+    <a href="javascript:history.back()" class="btn-back">← Back</a>
+
+</div>
+
+<script>
+    const baseFare  = {{ fare_amount }};
+    let paxCount    = 1;
+    const maxPax    = 6;
+
+    function updateTotal() {
+        document.getElementById("pax-count").textContent   = paxCount;
+        document.getElementById("total-amount").textContent = "₹" + (baseFare * paxCount).toFixed(2);
+    }
+
+    function addPassenger() {
+        if (paxCount >= maxPax) {
+            alert("Maximum 6 passengers per booking.");
+            return;
+        }
+        paxCount++;
+        const container = document.getElementById("passengers-container");
+        const div = document.createElement("div");
+        div.className  = "passenger-card";
+        div.id         = "pax-" + paxCount;
+        div.innerHTML  = `
+            <div class="passenger-title">Passenger ${paxCount}</div>
+            <button type="button" class="btn-remove" onclick="removePassenger(${paxCount})">Remove</button>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" placeholder="First name" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" placeholder="Last name" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" name="age" placeholder="Age" min="1" max="120" required>
+                </div>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select name="gender" required>
+                        <option value="" disabled selected>Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+        if (paxCount >= maxPax) {
+            document.getElementById("add-btn").style.display = "none";
+        }
+        updateTotal();
+    }
+
+    function removePassenger(id) {
+        const el = document.getElementById("pax-" + id);
+        if (el) el.remove();
+        paxCount--;
+        document.getElementById("add-btn").style.display = "block";
+        updateTotal();
+    }
+
+    function confirmPayment() {
+        return confirm("Confirm payment of ₹" + (baseFare * paxCount).toFixed(2) + "?");
+    }
+</script>
+</body>
+</html>

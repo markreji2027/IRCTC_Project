@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Fare</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4ff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 580px;
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header { text-align: center; margin-bottom: 28px; }
+        .header h1 { color: #1a237e; font-size: 22px; font-weight: 700; }
+        .train-info {
+            background: #f0f4ff;
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin-bottom: 24px;
+        }
+        .train-info .train-name {
+            font-size: 17px; font-weight: 700;
+            color: #1a237e; margin-bottom: 10px;
+        }
+        .train-info .row {
+            display: flex; justify-content: space-between;
+            font-size: 13px; color: #555; margin-top: 6px;
+        }
+        .train-info .row span { font-weight: 600; color: #333; }
+        .badge {
+            display: inline-block; padding: 3px 10px;
+            border-radius: 20px; font-size: 11px; font-weight: 600;
+        }
+        .badge-express     { background: #e3f2fd; color: #1565c0; }
+        .badge-superfast   { background: #e8f5e9; color: #2e7d32; }
+        .badge-rajdhani    { background: #fff3e0; color: #e65100; }
+        .badge-duronto     { background: #fce4ec; color: #c62828; }
+        .badge-shatabdi    { background: #f3e5f5; color: #6a1b9a; }
+        .badge-vandebharat { background: #e0f7fa; color: #006064; }
+        .section-label {
+            font-size: 13px; font-weight: 600;
+            color: #1565c0; margin-bottom: 10px;
+        }
+        .class-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 10px; margin-bottom: 24px;
+        }
+        .class-btn {
+            padding: 12px 8px; border: 2px solid #ddd;
+            border-radius: 8px; background: white;
+            font-size: 13px; font-weight: 600; color: #333;
+            cursor: pointer; text-align: center;
+            text-decoration: none; transition: all 0.2s; display: block;
+        }
+        .class-btn:hover { border-color: #1565c0; color: #1565c0; background: #f0f4ff; }
+        .class-btn.active { border-color: #1565c0; background: #1565c0; color: white; }
+        .class-btn.full { border-color: #eee; background: #fafafa; color: #bbb; cursor: not-allowed; }
+        .seats-badge {
+            display: block; font-size: 10px;
+            margin-top: 4px; font-weight: 400;
+        }
+        .seats-badge.ok      { color: #2e7d32; }
+        .seats-badge.limited { color: #e65100; }
+        .seats-badge.full    { color: #c62828; }
+        .fare-box {
+            background: #1565c0; border-radius: 12px;
+            padding: 24px; text-align: center; margin-bottom: 20px;
+        }
+        .fare-box .label  { color: #90caf9; font-size: 13px; margin-bottom: 8px; }
+        .quantity-row {
+            display: flex; align-items: center;
+            justify-content: center; gap: 20px; margin: 16px 0 4px;
+        }
+        .qty-btn {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 2px solid white; background: transparent;
+            color: white; font-size: 20px; cursor: pointer;
+            font-weight: 700; line-height: 1; transition: background 0.2s;
+        }
+        .qty-btn:hover { background: rgba(255,255,255,0.2); }
+        .qty-display {
+            font-size: 28px; font-weight: 700;
+            color: white; min-width: 30px; text-align: center;
+        }
+        .qty-label { color: #90caf9; font-size: 12px; margin-bottom: 12px; }
+        .fare-box .amount { color: white; font-size: 36px; font-weight: 700; }
+        .fare-box .subtext { color: #90caf9; font-size: 12px; margin-top: 6px; }
+        .fare-placeholder {
+            background: #f0f4ff; border-radius: 12px; padding: 24px;
+            text-align: center; margin-bottom: 20px; color: #888; font-size: 14px;
+        }
+        .distance-info {
+            text-align: center; font-size: 12px;
+            color: #888; margin-bottom: 20px;
+        }
+        .btn-book {
+            display: block; text-align: center; padding: 14px;
+            background: #2e7d32; color: white; border-radius: 10px;
+            text-decoration: none; font-weight: 700; font-size: 16px;
+            transition: background 0.2s; margin-bottom: 12px;
+        }
+        .btn-book:hover { background: #1b5e20; }
+        .btn-book.disabled {
+            background: #ccc; cursor: not-allowed; pointer-events: none;
+        }
+        .btn-row { display: flex; gap: 12px; margin-top: 0; }
+        .btn-back {
+            display: block; text-align: center; padding: 12px;
+            background: #1565c0; color: white; border-radius: 10px;
+            text-decoration: none; font-weight: 600; font-size: 15px;
+            transition: background 0.2s; flex: 1;
+        }
+        .btn-back:hover { background: #0d47a1; }
+        .btn-home {
+            display: block; text-align: center; padding: 12px;
+            background: #2e7d32; color: white; border-radius: 10px;
+            text-decoration: none; font-weight: 600; font-size: 15px;
+            transition: background 0.2s; flex: 1;
+        }
+        .btn-home:hover { background: #1b5e20; }
+    </style>
+</head>
+<body>
+<div class="card">
+
+    <div class="header"><h1>🎫 Fare Calculator</h1></div>
+
+    <div class="train-info">
+        <div class="train-name">{{ train.train_no }} — {{ train.train_name }}</div>
+        <div class="row">
+            <span>{{ train.from_station }}</span>
+            <span>→</span>
+            <span>{{ train.to_station }}</span>
+        </div>
+        <div class="row">
+            Departs: <span>{{ train.departs_at }}</span>
+            &nbsp;&nbsp;
+            Arrives: <span>{{ train.arrives_at }}</span>
+        </div>
+        <div class="row" style="margin-top:10px;">
+            {% set badge = train.train_type | lower | replace(' ', '') %}
+            <span class="badge badge-{{ badge }}">{{ train.train_type }}</span>
+        </div>
+    </div>
+
+    {% if distance %}
+    <p class="distance-info">📍 Distance: {{ distance }} km</p>
+    {% endif %}
+
+    <p class="section-label">Select Travel Class</p>
+    <div class="class-grid">
+        {% for cls in classes %}
+        {% set avail = seats.get(cls, 0) %}
+        {% set is_full = (cls != 'General' and avail <= 0) %}
+        <a href="{% if not is_full %}/fare?train_no={{ train.train_no }}&from_code={{ from_code }}&to_code={{ to_code }}&class={{ cls }}&travel_date={{ travel_date }}{% else %}#{% endif %}"
+           class="class-btn {% if selected_class == cls %}active{% endif %} {% if is_full %}full{% endif %}">
+            {{ cls }}
+            <span class="seats-badge
+                {% if cls == 'General' %}ok
+                {% elif avail > 50 %}ok
+                {% elif avail > 10 %}limited
+                {% else %}full{% endif %}">
+                {% if cls == 'General' %}Always open
+                {% elif avail > 0 %}{{ avail }} seats
+                {% else %}Full{% endif %}
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if fare_amount %}
+    <div class="fare-box">
+        <div class="label">Estimated Fare for {{ selected_class }}</div>
+        <div class="quantity-row">
+            <button class="qty-btn" onclick="changeQty(-1)">−</button>
+            <span class="qty-display" id="qty">1</span>
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+        <div class="qty-label">Passengers</div>
+        <div class="amount" id="total-fare">₹{{ "%.2f"|format(fare_amount) }}</div>
+        <div class="subtext">
+            ₹{{ "%.2f"|format(fare_amount) }} per passenger &nbsp;|&nbsp;
+            {{ distance }} km × {{ train.train_type }} × {{ selected_class }}
+        </div>
+    </div>
+
+    <a id="book-btn"
+       href="/booking?train_no={{ train.train_no }}&from_code={{ from_code }}&to_code={{ to_code }}&class={{ selected_class }}&travel_date={{ travel_date }}&fare={{ fare_amount }}"
+       class="btn-book">
+        Book Now
+    </a>
+
+    {% else %}
+    <div class="fare-placeholder">
+        Select a class above to see the estimated fare
+    </div>
+    {% endif %}
+
+    <div class="btn-row">
+        <a href="javascript:history.back()" class="btn-back">← Back to Results</a>
+        <a href="/" class="btn-home">Search Again</a>
+    </div>
+
+</div>
+
+<script>
+    const baseFare = {{ fare_amount if fare_amount else 0 }};
+    const maxSeats = {{ seats.get(selected_class, 6) if selected_class else 6 }};
+    let qty = 1;
+
+    function changeQty(delta) {
+        qty = Math.max(1, Math.min(6, qty + delta));
+        document.getElementById("qty").textContent = qty;
+        document.getElementById("total-fare").textContent =
+            "₹" + (baseFare * qty).toFixed(2);
+        const btn = document.getElementById("book-btn");
+        if (btn) {
+            btn.href = "/booking?train_no={{ train.train_no }}&from_code={{ from_code }}&to_code={{ to_code }}&class={{ selected_class }}&travel_date={{ travel_date }}&fare=" + baseFare;
+        }
+    }
+</script>
+</body>
+</html>

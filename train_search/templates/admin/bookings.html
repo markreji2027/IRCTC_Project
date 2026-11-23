@@ -1,0 +1,95 @@
+{% extends "admin/base.html" %}
+{% block title %}Bookings{% endblock %}
+{% block page_title %}All Bookings{% endblock %}
+
+{% block content %}
+
+<div class="cards-row">
+    <div class="stat-card">
+        <div class="label">Total Bookings</div>
+        <div class="value">{{ bookings | length }}</div>
+        <div class="sub">All time</div>
+    </div>
+    <div class="stat-card green">
+        <div class="label">Total Revenue</div>
+        <div class="value">₹{{ "{:,.0f}".format(total_revenue) }}</div>
+        <div class="sub">All time</div>
+    </div>
+    <div class="stat-card orange">
+        <div class="label">Total Passengers</div>
+        <div class="value">{{ total_passengers }}</div>
+        <div class="sub">Across all bookings</div>
+    </div>
+    <div class="stat-card purple">
+        <div class="label">Avg Fare</div>
+        <div class="value">₹{{ "{:,.0f}".format(avg_fare) }}</div>
+        <div class="sub">Per booking</div>
+    </div>
+</div>
+
+<div class="table-card">
+    <h3>Booking Records</h3>
+    {% if bookings %}
+    <table>
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Train</th>
+                <th>Route</th>
+                <th>Class</th>
+                <th>Travel Date</th>
+                <th>Passengers</th>
+                <th>Total Fare</th>
+                <th>Booked At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in bookings %}
+            <tr>
+                <td><span class="pill">#{{ b.booking_id }}</span></td>
+                <td>
+                    <strong style="color:#3b82f6;">{{ b.train_no }}</strong>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:2px;">
+                        {{ b.train_name }}
+                    </div>
+                </td>
+                <td>
+                    <strong>{{ b.from_code }}</strong>
+                    <span style="color:#cbd5e1;"> → </span>
+                    <strong>{{ b.to_code }}</strong>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:2px;">
+                        {{ b.from_station }} → {{ b.to_station }}
+                    </div>
+                </td>
+                <td><span class="badge badge-express">{{ b.class }}</span></td>
+                <td>{{ b.travel_date }}</td>
+                <td style="text-align:center;">{{ b.total_passengers }}</td>
+                <td class="revenue">₹{{ "{:,.2f}".format(b.total_fare | float) }}</td>
+                <td style="color:#94a3b8; font-size:12px;">
+                    {{ b.booked_at.strftime('%d %b %Y %H:%M') }}
+                </td>
+            </tr>
+            <!-- Passenger sub-rows -->
+            {% for p in b.passengers %}
+            <tr style="background:#fafbff;">
+                <td></td>
+                <td colspan="2" style="padding-left:28px; color:#64748b; font-size:12px;">
+                    ↳ {{ p.first_name }} {{ p.last_name }}
+                    &nbsp;|&nbsp; Age: {{ p.age }}
+                    &nbsp;|&nbsp; {{ p.gender }}
+                </td>
+                <td colspan="2" style="color:#64748b; font-size:12px;">
+                    Seat: <span class="pill">{{ p.seat_number }}</span>
+                </td>
+                <td colspan="3"></td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-data">No bookings yet.</div>
+    {% endif %}
+</div>
+
+{% endblock %}

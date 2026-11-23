@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4ff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 950px;
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header { text-align: center; margin-bottom: 24px; }
+        .header h1 { color: #1a237e; font-size: 22px; font-weight: 700; }
+        .route-info {
+            background: #f0f4ff;
+            border-radius: 10px;
+            padding: 14px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .route-info .route { font-size: 18px; font-weight: 700; color: #1a237e; }
+        .route-info .date  { font-size: 14px; color: #555; }
+        .found { font-size: 13px; color: #1565c0; font-weight: 600; margin-bottom: 16px; }
+
+        /* Train card */
+        .train-card {
+            border: 1.5px solid #e0e0e0;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+        .train-header {
+            background: #f8f9ff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .train-no   { font-weight: 700; color: #1565c0; font-size: 15px; }
+        .train-name { font-weight: 600; color: #222; font-size: 15px; }
+        .train-time { font-size: 14px; color: #444; }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-express     { background: #e3f2fd; color: #1565c0; }
+        .badge-superfast   { background: #e8f5e9; color: #2e7d32; }
+        .badge-rajdhani    { background: #fff3e0; color: #e65100; }
+        .badge-duronto     { background: #fce4ec; color: #c62828; }
+        .badge-shatabdi    { background: #f3e5f5; color: #6a1b9a; }
+        .badge-vandebharat { background: #e0f7fa; color: #006064; }
+
+        /* Seats grid */
+        .seats-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0;
+        }
+        .seat-cell {
+            padding: 12px 8px;
+            text-align: center;
+            border-right: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .seat-cell:last-child { border-right: none; }
+        .seat-cell:hover { background: #f0f4ff; }
+        .seat-class { font-size: 12px; font-weight: 700; color: #333; margin-bottom: 4px; }
+        .seat-count { font-size: 18px; font-weight: 700; }
+        .seat-count.available  { color: #2e7d32; }
+        .seat-count.limited    { color: #e65100; }
+        .seat-count.unavailable{ color: #c62828; }
+        .seat-label { font-size: 10px; color: #888; margin-top: 2px; }
+        .seat-fare  { font-size: 10px; color: #1565c0; margin-top: 2px; font-weight: 600; }
+
+        .no-trains {
+            text-align: center; padding: 40px 0; color: #888; font-size: 15px;
+        }
+        .no-trains span { font-size: 36px; display: block; margin-bottom: 12px; }
+        .btn-back {
+            display: block; text-align: center; margin-top: 28px; padding: 12px;
+            background: #1565c0; color: white; border-radius: 10px;
+            text-decoration: none; font-weight: 600; font-size: 15px;
+            transition: background 0.2s;
+        }
+        .btn-back:hover { background: #0d47a1; }
+    </style>
+</head>
+<body>
+<div class="card">
+
+    <div class="header"><h1>🚂 Train Search</h1></div>
+
+    <div class="route-info">
+        <span class="route">{{ from_code }} → {{ to_code }}</span>
+        <span class="date">📅 {{ date_str }} &nbsp;|&nbsp; {{ day_name }}</span>
+    </div>
+
+    <p class="found">{{ trains|length }} train(s) found</p>
+
+    {% if trains %}
+        {% for t in trains %}
+        <div class="train-card">
+
+            <!-- Train header -->
+            <div class="train-header">
+                <div>
+                    <span class="train-no">{{ t.train_no }}</span>
+                    &nbsp;
+                    <span class="train-name">{{ t.train_name }}</span>
+                    &nbsp;
+                    {% set badge = t.train_type | lower | replace(' ', '') %}
+                    <span class="badge badge-{{ badge }}">{{ t.train_type }}</span>
+                </div>
+                <div class="train-time">
+                    🕐 {{ t.departs_at }} → {{ t.arrives_at }}
+                </div>
+            </div>
+
+            <!-- Seats grid — click a class to go to fare/booking -->
+            <div class="seats-grid">
+                {% set classes = [
+                    ('General', 0.30, 0.80),
+                    ('2S',      0.45, 0.80),
+                    ('Sleeper', 0.60, 0.80),
+                    ('3AC',     1.35, 0.90),
+                    ('2AC',     2.50, 0.90),
+                    ('1AC',     4.00, 0.90)
+                ] %}
+                {% for cls, class_rate, type_rate in classes %}
+                {% set avail = t.seats.get(cls, 0) %}
+                {% set distance = namespace(val=0) %}
+                <a class="seat-cell"
+                   href="/fare?train_no={{ t.train_no }}&from_code={{ from_code }}&to_code={{ to_code }}&class={{ cls }}&travel_date={{ travel_date }}"
+                   style="text-decoration:none; color:inherit;">
+                    <div class="seat-class">{{ cls }}</div>
+                    <div class="seat-count
+                        {% if cls == 'General' %}available
+                        {% elif avail > 50 %}available
+                        {% elif avail > 10 %}limited
+                        {% else %}unavailable{% endif %}">
+                        {% if cls == 'General' %}AVL{% else %}{{ avail }}{% endif %}
+                    </div>
+                    <div class="seat-label">
+                        {% if cls == 'General' %}Always open
+                        {% elif avail > 0 %}seats left
+                        {% else %}Full{% endif %}
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+
+        </div>
+        {% endfor %}
+
+    {% else %}
+    <div class="no-trains">
+        <span>😔</span>
+        No trains available on this route for the selected date.
+    </div>
+    {% endif %}
+
+    <a href="/" class="btn-back">← Search Again</a>
+</div>
+</body>
+</html>

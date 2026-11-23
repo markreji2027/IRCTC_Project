@@ -1,0 +1,127 @@
+{% extends "admin/base.html" %}
+{% block title %}Routes{% endblock %}
+{% block page_title %}Route Statistics{% endblock %}
+
+{% block content %}
+
+<div class="cards-row">
+    <div class="stat-card">
+        <div class="label">Total Routes</div>
+        <div class="value">{{ routes | length }}</div>
+        <div class="sub">Unique station pairs</div>
+    </div>
+    <div class="stat-card green">
+        <div class="label">Busiest Route</div>
+        <div class="value" style="font-size:18px;">
+            {% if routes %}
+                {{ routes[0].from_code }} → {{ routes[0].to_code }}
+            {% else %}
+                N/A
+            {% endif %}
+        </div>
+        <div class="sub">Most bookings</div>
+    </div>
+    <div class="stat-card orange">
+        <div class="label">Top Revenue Route</div>
+        <div class="value" style="font-size:18px;">
+            {% if top_revenue_route %}
+                {{ top_revenue_route.from_code }} → {{ top_revenue_route.to_code }}
+            {% else %}
+                N/A
+            {% endif %}
+        </div>
+        <div class="sub">Highest revenue</div>
+    </div>
+    <div class="stat-card purple">
+        <div class="label">Avg Distance</div>
+        <div class="value">{{ avg_distance }} km</div>
+        <div class="sub">Across all routes</div>
+    </div>
+</div>
+
+<!-- Bookings by route chart -->
+<div class="chart-card" style="margin-bottom:20px;">
+    <h3>Bookings by Route</h3>
+    <div class="chart-wrap" style="height:240px;">
+        <canvas id="routeChart"></canvas>
+    </div>
+</div>
+
+<!-- Routes table -->
+<div class="table-card">
+    <h3>All Routes</h3>
+    {% if routes %}
+    <table>
+        <thead>
+            <tr>
+                <th>Route</th>
+                <th>Distance</th>
+                <th>Trains Available</th>
+                <th>Bookings</th>
+                <th>Passengers</th>
+                <th>Revenue</th>
+                <th>Avg Fare</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in routes %}
+            <tr>
+                <td>
+                    <strong style="color:#3b82f6;">{{ r.from_code }}</strong>
+                    <span style="color:#cbd5e1;"> → </span>
+                    <strong style="color:#3b82f6;">{{ r.to_code }}</strong>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:2px;">
+                        {{ r.from_station }} → {{ r.to_station }}
+                    </div>
+                </td>
+                <td>{{ r.distance_km }} km</td>
+                <td style="text-align:center;">{{ r.train_count }}</td>
+                <td style="text-align:center;">{{ r.total_bookings or 0 }}</td>
+                <td style="text-align:center;">{{ r.total_passengers or 0 }}</td>
+                <td class="revenue">₹{{ "{:,.2f}".format(r.total_revenue | float) }}</td>
+                <td style="color:#64748b;">
+                    {% if r.total_bookings %}
+                        ₹{{ "{:,.0f}".format(r.total_revenue | float / r.total_bookings) }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-data">No route data found.</div>
+    {% endif %}
+</div>
+
+<script>
+    const routeLabels  = {{ route_labels  | tojson }};
+    const routeData    = {{ route_data    | tojson }};
+
+    new Chart(document.getElementById("routeChart"), {
+        type: "bar",
+        data: {
+            labels: routeLabels.length ? routeLabels : ["No data"],
+            datasets: [{
+                label: "Bookings",
+                data: routeData.length ? routeData : [0],
+                backgroundColor: "rgba(59,130,246,0.7)",
+                borderColor: "#3b82f6",
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                x: { ticks: { maxRotation: 30, font: { size: 11 } } }
+            }
+        }
+    });
+</script>
+
+{% endblock %}
